@@ -1,0 +1,11 @@
+Agentforce 360 League App:
+--------------------------
+
+https://agentforce-360-league-353a8a8aec02.herokuapp.com/
+
+Agentforce Related Links:
+-------------------------
+
+https://developer.salesforce.com/sample-apps/agent-script-recipes/getting-started/overview
+
+https://developer.salesforce.com/docs/ai/agentforce/guide/agent-script.html

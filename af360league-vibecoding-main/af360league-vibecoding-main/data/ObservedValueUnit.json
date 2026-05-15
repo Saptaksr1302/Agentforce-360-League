@@ -1,0 +1,12 @@
+{
+  "records": [
+    {
+      "attributes": {
+        "type": "UnitOfMeasure",
+        "referenceId": "ObservedValueUnitRef1"
+      },
+      "Name": "Percentage",
+      "UnitCode": "Percentage"
+    }
+  ]
+}

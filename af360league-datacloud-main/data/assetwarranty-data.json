@@ -1,0 +1,38 @@
+{
+  "records": [
+    {
+      "attributes": {
+        "type": "AssetWarranty",
+        "referenceId": "AssetWarrantyRef1"
+      },
+      "AssetId": "@AssetRef1",
+      "WarrantyTermId": "@WarrantyTermRef1",
+      "StartDate": "2024-01-15",
+      "EndDate": "2026-01-15",
+      "WarrantyType": "Full Coverage"
+    },
+    {
+      "attributes": {
+        "type": "AssetWarranty", 
+        "referenceId": "AssetWarrantyRef2"
+      },
+      "AssetId": "@AssetRef2",
+      "WarrantyTermId": "@WarrantyTermRef2",
+      "StartDate": "2024-06-01",
+      "EndDate": "2025-12-01",
+      "WarrantyType": "Parts Only"
+    },
+    {
+      "attributes": {
+        "type": "AssetWarranty",
+        "referenceId": "AssetWarrantyRef3"
+      },
+      "AssetId": "@AssetRef3", 
+      "WarrantyTermId": "@WarrantyTermRef3",
+      "StartDate": "2023-11-10",
+      "EndDate": "2024-11-10",
+      "WarrantyType": "Standard"
+    }
+  ]
+}
+

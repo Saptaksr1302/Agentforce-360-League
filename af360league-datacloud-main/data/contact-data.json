@@ -1,0 +1,41 @@
+{
+  "records": [
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "ContactRef1"
+      },
+      "FirstName": "John",
+      "LastName": "Smith",
+      "Email": "john.smith@acme.com",
+      "Phone": "+1 (313) 555-0124",
+      "Title": "Maintenance Manager",
+      "AccountId": "@AccountRef1"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "ContactRef2"
+      },
+      "FirstName": "Sarah",
+      "LastName": "Johnson",
+      "Email": "sarah.j@precision.com",
+      "Phone": "+1 (216) 555-0457",
+      "Title": "Operations Director",
+      "AccountId": "@AccountRef2"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "ContactRef3"
+      },
+      "FirstName": "Mike",
+      "LastName": "Chen",
+      "Email": "mchen@globalindustries.com",
+      "Phone": "+1 (713) 555-0790",
+      "Title": "Fleet Manager",
+      "AccountId": "@AccountRef3"
+    }
+  ]
+}
+

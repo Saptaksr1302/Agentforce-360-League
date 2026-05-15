@@ -1,0 +1,84 @@
+system:
+  instructions: "You are an AI Agent."
+
+  messages:
+    welcome: "Hello! I'm your Mortgage Payment Assistant. I can help you with questions about your mortgage balance, payment dates, interest rates, and payment history. What would you like to know?"
+    error: "Sorry, it looks like something has gone wrong."
+config:
+  developer_name: "Mortgage_Payment_Assistant"
+  default_agent_user: "<replace this with your agent user>"
+  agent_label: "Mortgage Payment Assistant"
+  description: "Customer-facing agent that helps homeowners with mortgage questions"
+
+variables:
+  total_interest_paid: mutable number
+      description: "Stores the total interest paid in a fiscal year."
+
+start_agent topic_selector:
+    label: "Topic Selector"
+    description: "Welcome the user and determine the appropriate topic based on user input"
+
+    reasoning:
+        instructions: ->
+            | Select the tool that best matches the user's message and conversation history. If it's unclear, make your best guess.
+        actions:
+            go_to_calculate_ytd_interest_paid: @utils.transition to @topic.calculate_ytd_interest_paid 
+           
+topic calculate_ytd_interest_paid:
+   # new topic
+   label: "Calculate YTD Interest Paid"
+   description: "Calculate total interest paid for fiscal year"
+   reasoning:
+      instructions: ->
+         | Check if they mention a specific year (e.g., "2024", "2025")
+            Get their Financial Account ID from context
+            Ask for Account Id or Finacial Account Number, if not provided
+            Call "Calculate YTD Interest Paid" action
+            If they specified a year, pass it as fiscalYear parameter
+            If no year mentioned, leave fiscalYear empty (will auto-detect)
+            Format result as $[amount] with commas
+            Include which fiscal year in your response. When the customer asks about interest paid this year or YTD interest:
+            Example: "You've paid ₹6,32,893 in interest for fiscal year 2025." 
+      actions:
+            calculate_ytd_interest_paid: @actions.calculate_ytd_interest_paid
+                with accountId = ...
+                with financialAccountNumber = ...
+                with fiscalYear = ...  
+                set @variables.total_interest_paid = @outputs.ytdInterest
+        
+
+   actions:
+      calculate_ytd_interest_paid:
+        description: "Returns total interest paid for a specified fiscal year. If no year is provided, uses the current fiscal year."
+        inputs:
+          accountId: string
+            description: "The Financial Account ID to calculate interest for"
+            label: "Account ID"
+            is_required: True
+            
+          financialAccountNumber: string
+             description: "The Financial Account Number to calculate interest for. Either Account ID or Financial Account Number must be provided." 
+
+          fiscalYear: integer
+            description: "Optional: The fiscal year to calculate interest for (e.g., 2025). If not provided, uses the current fiscal year."
+            label: "Fiscal Year"
+            
+        outputs:
+          accountId: string
+            description: "The Financial Account ID that the interest was calculated for"
+            label: "Account ID"
+            is_used_by_planner: True
+            is_displayable: False
+          fiscalYear: integer
+            description: "The fiscal year used for the interest calculation"
+            label: "Fiscal Year"
+            is_used_by_planner: True
+            is_displayable: True
+          ytdInterest: number
+            description: "Total interest amount paid in the specified fiscal year"
+            label: "YTD Interest Paid"
+            is_used_by_planner: True
+            is_displayable: True
+        target: "apex://InterestCalculator"
+        label: "Calculate YTD Interest Paid"
+

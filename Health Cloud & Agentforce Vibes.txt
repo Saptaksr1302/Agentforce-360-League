@@ -1,0 +1,18 @@
+Health Cloud:
+-------------
+
+https://developer.salesforce.com/developer-centers/health-cloud
+
+https://developer.salesforce.com/docs/atlas.en-us.health_cloud_object_reference.meta/health_cloud_object_reference/sforce_api_objects.htm
+
+https://trailhead.salesforce.com/content/learn/trails/get-to-know-healthcloud
+
+Agentforce Vibes:
+-----------------
+
+https://github.com/forcedotcom/afv-library
+
+https://www.youtube.com/playlist?list=PLgIMQe2PKPSIPk_YOY4XZn72y0yl-Zqt4
+
+https://developer.salesforce.com/docs/platform/einstein-for-devs/guide/einstein-overview.html
+

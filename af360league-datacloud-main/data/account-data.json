@@ -1,0 +1,56 @@
+{
+  "records": [
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "AccountRef1"
+      },
+      "Name": "Acme Manufacturing",
+      "Type": "Customer - Direct",
+      "Industry": "Heavy Equipment Manufacturing",
+      "BillingStreet": "1234 Industrial Parkway",
+      "BillingCity": "Detroit",
+      "BillingState": "MI",
+      "BillingPostalCode": "48201",
+      "BillingCountry": "USA",
+      "Phone": "+1 (313) 555-0123",
+      "Website": "www.acmemanufacturing.com",
+      "NumberOfEmployees": 250
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "AccountRef2"
+      },
+      "Name": "Precision Parts Corp",
+      "Type": "Customer - Direct",
+      "Industry": "Automotive Parts Manufacturing",
+      "BillingStreet": "5678 Manufacturing Drive",
+      "BillingCity": "Cleveland",
+      "BillingState": "OH",
+      "BillingPostalCode": "44114",
+      "BillingCountry": "USA",
+      "Phone": "+1 (216) 555-0456",
+      "Website": "www.precisionpartscorp.com",
+      "NumberOfEmployees": 180
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "AccountRef3"
+      },
+      "Name": "Global Industries Ltd",
+      "Type": "Customer - Partner Channel",
+      "Industry": "Industrial Equipment Distribution",
+      "BillingStreet": "9012 Commerce Boulevard",
+      "BillingCity": "Houston",
+      "BillingState": "TX",
+      "BillingPostalCode": "77002",
+      "BillingCountry": "USA",
+      "Phone": "+1 (713) 555-0789",
+      "Website": "www.globalindustriesltd.com",
+      "NumberOfEmployees": 500
+    }
+  ]
+}
+

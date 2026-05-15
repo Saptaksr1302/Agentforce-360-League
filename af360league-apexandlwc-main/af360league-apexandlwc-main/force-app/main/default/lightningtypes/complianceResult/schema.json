@@ -1,0 +1,5 @@
+{
+  "title": "Compliance Result",
+  "description": "Price compliance check result with target price, gap and status",
+  "lightning:type": "@apexClassType/c__ComplianceMetrics"
+}

@@ -1,0 +1,38 @@
+{
+  "records": [
+    {
+      "attributes": {
+        "type": "WorkOrder",
+        "referenceId": "WorkOrderRef1"
+      },
+      "Subject": "Excavator Preventive Maintenance Plan",
+      "AssetId": "@AssetRef1",
+      "Status": "New",
+      "Priority": "Medium",
+      "Description": "Hydraulic fluid check, filter replacement, track tension inspection, greasing points"
+    },
+    {
+      "attributes": {
+        "type": "WorkOrder",
+        "referenceId": "WorkOrderRef2"
+      },
+      "Subject": "Hydraulic Pump Service Plan", 
+      "AssetId": "@AssetRef2",
+      "Status": "New",
+      "Priority": "Medium",
+      "Description": "Pressure test, seal inspection, fluid analysis, flow rate measurement"
+    },
+    {
+      "attributes": {
+        "type": "WorkOrder",
+        "referenceId": "WorkOrderRef3"
+      },
+      "Subject": "Compressor Quarterly Service",
+      "AssetId": "@AssetRef3",
+      "Status": "New",
+      "Priority": "Medium",
+      "Description": "Filter replacement, belt tension check, vibration analysis"
+    }
+  ]
+}
+

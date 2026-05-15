@@ -1,0 +1,23 @@
+openapi: 3.0.3
+components:
+  schemas:
+    AssetTelemetry:
+      type: object
+      properties:
+        event_id:
+          type: string
+        asset_salesforce_id:
+          type: string
+        engine_temp:
+          type: number
+        fuel_consumption:
+          type: number
+        vibration_level:
+          type: number
+        operating_hours:
+          type: number
+        timestamp:
+          type: string
+          format: date-time
+        hydraulic_pressure:
+          type: number

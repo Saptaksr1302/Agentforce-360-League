@@ -1,0 +1,26 @@
+[
+  {
+    "sobject": "Account",
+    "files": ["account-data.json"]
+  },
+  {
+    "sobject": "Contact",
+    "files": ["contact-data.json"]
+  },
+  {
+    "sobject": "Asset",
+    "files": ["asset-data.json"]
+  },
+  {
+    "sobject": "WarrantyTerm",
+    "files": ["warrantyterm-data.json"]
+  },
+  {
+    "sobject": "AssetWarranty",
+    "files": ["assetwarranty-data.json"]
+  },
+  {
+    "sobject": "WorkOrder",
+    "files": ["maintenanceplan-data.json"]
+  }
+]

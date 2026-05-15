@@ -1,0 +1,41 @@
+{
+  "records": [
+    {
+      "attributes": {
+        "type": "WarrantyTerm",
+        "referenceId": "WarrantyTermRef1"
+      },
+      "WarrantyTermName": "Excavator Full Coverage 2024",
+      "EffectiveStartDate": "2024-01-01",
+      "WarrantyType": "Full Service & Parts",
+      "WarrantyDuration": 24,
+      "WarrantyUnitOfTime": "Months",
+      "Exclusions": "Operator misuse, lack of maintenance, environmental damage"
+    },
+    {
+      "attributes": {
+        "type": "WarrantyTerm",
+        "referenceId": "WarrantyTermRef2"
+      },
+      "WarrantyTermName": "Hydraulic Pump Parts Only 2024",
+      "EffectiveStartDate": "2024-01-01",
+      "WarrantyType": "Parts Replacement", 
+      "WarrantyDuration": 18,
+      "WarrantyUnitOfTime": "Months",
+      "Exclusions": "Installation labor, fluid contamination, normal wear items"
+    },
+    {
+      "attributes": {
+        "type": "WarrantyTerm",
+        "referenceId": "WarrantyTermRef3"
+      },
+      "WarrantyTermName": "Compressor Standard Coverage 2024",
+      "EffectiveStartDate": "2024-01-01",
+      "WarrantyType": "Parts & Basic Service",
+      "WarrantyDuration": 12,
+      "WarrantyUnitOfTime": "Months", 
+      "Exclusions": "Electrical components, software issues"
+    }
+  ]
+}
+

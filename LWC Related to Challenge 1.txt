@@ -1,0 +1,1309 @@
+Compliance Checker Card:
+------------------------
+
+HTML File
+---------
+
+<template>
+    <lightning-card title="Price Compliance Check" icon-name="standard:pricebook">
+        <div class="slds-card__body slds-card__body_inner">
+            <!-- Status Banner -->
+            <div class={bannerClass} role="alert">
+                <div class="slds-media">
+                    <div class="slds-media__figure">
+                        <lightning-icon icon-name={statusIcon} size="small" alternative-text={value.statusMessage}></lightning-icon>
+                    </div>
+                    <div class="slds-media__body">
+                        <h2 class="slds-text-heading_small">{value.statusMessage}</h2>
+                        <p class="slds-text-body_small" if:true={showDetails}>
+                            Price Gap: <strong>{formattedPriceGap}</strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Compliance Details - Simple Data Display -->
+            <div if:true={showDetails}>
+                <p><strong>Observed Price:</strong> ${formattedObservedPrice}</p>
+                <p><strong>Target Price:</strong> ${formattedTargetPrice}</p>
+                <p><strong>Price Gap:</strong> {formattedPriceGap}</p>
+                <p if:true={showPenalty}><strong>Penalty:</strong> ${formattedPenalty}</p>
+                <p if:true={showStoreType}><strong>Store Type:</strong> {value.storeType}</p>
+            </div>
+
+            <!-- Error Message -->
+            <div if:true={hasError}>
+                <p><strong>Error:</strong> {value.errorMessage}</p>
+            </div>
+        </div>
+    </lightning-card>
+</template>
+
+JS File:
+--------
+
+import { LightningElement, api, track } from 'lwc';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+
+export default class ComplianceCheckerCard extends LightningElement {
+    // Public properties - can be set from parent component or flow
+    @api value;
+
+
+    // Computed properties for styling
+    get bannerClass() {
+        const baseClass = 'slds-notify slds-notify_alert slds-m-bottom_small';
+        
+        if (this.value.statusColor === 'RED') {
+            return `${baseClass} slds-theme_error`;
+        } else if (this.value.statusColor === 'YELLOW') {
+            return `${baseClass} slds-theme_warning`;
+        } else if (this.value.statusColor === 'GREEN') {
+            return `${baseClass} slds-theme_success`;
+        } else {
+            return `${baseClass} slds-theme_offline`;
+        }
+    }
+
+    get statusIcon() {
+        if (this.value.statusColor === 'RED') {
+            return 'utility:error';
+        } else if (this.value.statusColor === 'YELLOW') {
+            return 'utility:warning';
+        } else if (this.value.statusColor === 'GREEN') {
+            return 'utility:success';
+        } else {
+            return 'utility:info';
+        }
+    }
+
+    get showDetails() {
+        return this.value.isSuccess && this.value.targetPrice != null && this.value.priceGap != null;
+    }
+
+    
+
+    get hasError() {
+        return !this.value.isSuccess && this.value.errorMessage;
+    }
+
+    get formattedObservedPrice() {
+        return this.value?.observedPrice != null ? this.value.observedPrice.toFixed(2) : '0.00';
+    }
+
+    get formattedTargetPrice() {
+        return this.value.targetPrice != null ? this.value.targetPrice.toFixed(2) : '0.00';
+    }
+
+    get formattedPriceGap() {
+        if (this.value.priceGap == null) return '$0.00';
+        const gap = this.value.priceGap;
+        const sign = gap >= 0 ? '+' : '';
+        return `${sign}$${gap.toFixed(2)}`;
+    }
+
+
+    get showPenalty() {
+        return this.value.penalty != null && this.value.penalty > 0;
+    }
+
+    get showStoreType() {
+        return this.value.storeType != null && this.value.storeType.trim().length > 0;
+    }
+
+    get formattedPenalty() {
+        return this.value.penalty != null ? this.value.penalty.toFixed(2) : '0.00';
+    }
+
+    /**
+     * Shows a toast notification
+     */
+    showToast(title, message, variant) {
+        const evt = new ShowToastEvent({
+            title: title,
+            message: message,
+            variant: variant,
+            mode: 'dismissable'
+        });
+        this.dispatchEvent(evt);
+    }
+}
+
+Meta.xml File:
+--------------
+
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>64.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Compliance Checker Card LWC</masterLabel>
+    <targets>
+        <target>lightning__AgentforceOutput</target>
+    </targets>
+</LightningComponentBundle>
+
+Promotion State Manager Component:
+----------------------------------
+
+JS:
+---
+import { defineState } from '@lwc/state';
+
+const promotionStateManager = defineState(({atom, setAtom, computed}) => {
+
+    const promotionName = atom('');
+    const chosenProducts = atom([]);
+    const chosenStores = atom([]);
+
+    const setProduct = (product) => {
+        let chosenProductsTemp = [...chosenProducts.value];
+
+        const existingIndex = chosenProductsTemp.findIndex(
+            p => p.productId === product.productId
+        );
+
+        if (existingIndex >= 0) {
+            chosenProductsTemp[existingIndex] = {
+                ...chosenProductsTemp[existingIndex],
+                ...product
+            };
+        } else {
+            chosenProductsTemp.push(product);
+        }
+
+        setAtom(chosenProducts, chosenProductsTemp);
+    };
+
+    const removeProduct = (productId) => {
+        let chosenProductsTemp =
+            chosenProducts.value.filter(p => p.productId !== productId);
+        setAtom(chosenProducts, chosenProductsTemp);
+    };
+
+    const updateProducts = (products) => {
+        setAtom(chosenProducts, [...products]);
+    };
+
+    const isProductSelected = (productId) => {
+        return chosenProducts.value.some(p => p.productId === productId);
+    };
+
+    const getProductDiscount = (productId) => {
+        const product = chosenProducts.value.find(
+            p => p.productId === productId
+        );
+        return product ? product.discountPercent : 0;
+    };
+
+    const productCount = computed([chosenProducts], (products) => products.length);
+
+    const updateStores = (stores) => {
+        setAtom(chosenStores, [...stores]);
+    };
+
+    const updatePromotionName = (name) => {
+        setAtom(promotionName, name);
+    };
+
+    return {
+        promotionName,
+        chosenProducts,
+        setProduct,
+        removeProduct,
+        updateProducts,
+        isProductSelected,
+        getProductDiscount,
+        productCount,
+        chosenStores,
+        updateStores,
+        updatePromotionName
+    };
+});
+
+export default promotionStateManager;
+
+Meta.xml -> true
+
+Promotion Wizard Step 1:
+------------------------
+
+HTML:
+-----
+
+<template>
+    <lightning-input label="Promotion Name" value={promotionName} onchange={handleChange}></lightning-input>
+</template>
+
+JS:
+---
+
+import { LightningElement, api } from 'lwc';
+
+/** TODO FOR THE CHALLENGE: import the state manager, and the context modules */
+import promotionStateManager from 'c/promotionStateManager';
+import { fromContext } from '@lwc/state';
+
+export default class PromotionWizardStep1 extends LightningElement {
+    
+    /** TODO FOR THE CHALLENGE: initialize/inherit the state from the parent */
+    promotionState = fromContext(promotionStateManager);
+    promotionName;
+
+    connectedCallback(){
+        this.promotionName = this.promotionState?.value?.promotionName;
+    }
+
+    handleChange(event) {
+        this.promotionName = event.target.value;
+        console.log('Promotion Name:', this.promotionName);
+    }
+
+    @api
+    allValid(){
+        // Read the current input value (handles clicking Next before onchange fires)
+        this.promotionName = this.template.querySelector('lightning-input')?.value || this.promotionName;
+
+        if(this.promotionName === undefined || this.promotionName === ''){
+            return false;
+        }else{
+            console.log('allValid() Called');
+            // Update the promotion name in the state
+            this.promotionState.value.updatePromotionName(this.promotionName);
+            console.log(this.promotionName);
+        
+            return true;
+        }
+    }
+}
+
+Meta.xml -> false
+
+Promotion Wizard Step 2:
+------------------------
+
+HTML:
+-----
+
+<template>
+    <div class="slds-m-bottom_medium">
+        <h2 class="slds-text-heading_medium slds-m-bottom_small">Select Products &mp; Set Discounts</h2>
+        <p class="slds-text-body_regular slds-text-color_weak">
+            Choose products for this promotion and set the discount percentage for each.
+        </p>
+    </div>
+
+    <!-- Error Message -->
+    <template lwc:if={error}>
+        <div class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_medium" role="alert">
+            <span class="slds-assistive-text">error</span>
+            <span class="slds-icon_container slds-icon-utility-error slds-m-right_x-small">
+                <lightning-icon icon-name="utility:error" alternative-text="Error" size="x-small" variant="inverse"></lightning-icon>
+            </span>
+            <h2>{error}</h2>
+        </div>
+    </template>
+
+    <!-- Loading Spinner -->
+    <template lwc:if={isLoading}>
+        <div class="slds-align_absolute-center slds-p-around_large">
+            <lightning-spinner alternative-text="Loading products..." size="medium"></lightning-spinner>
+        </div>
+    </template>
+
+    <template lwc:if={hasProducts}>
+        <!-- Selection Summary -->
+        <div class="slds-box slds-box_x-small slds-theme_shade slds-m-bottom_medium">
+            <p class="slds-text-body_regular">
+                <lightning-icon icon-name="utility:check" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                <strong>{selectedCount}</strong> product(s) selected
+            </p>
+        </div>
+
+        <!-- Products Table -->
+        <div class="slds-scrollable_x">
+            <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                <thead>
+                    <tr class="slds-line-height_reset">
+                        <th class="" scope="col" style="width: 50px;">
+                            <div class="slds-truncate" title="Select">Select</div>
+                        </th>
+                        <th class="" scope="col">
+                            <div class="slds-truncate" title="Product Name">Product Name</div>
+                        </th>
+                        <th class="" scope="col">
+                            <div class="slds-truncate" title="Category">Category</div>
+                        </th>
+                        <th class="" scope="col" style="width: 150px;">
+                            <div class="slds-truncate" title="Discount %">Discount %</div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template for:each={products} for:item="product">
+                        <tr key={product.id}>
+                            <td data-label="Select">
+                                <lightning-input
+                                    type="checkbox"
+                                    data-id={product.id}
+                                    checked={product.isSelected}
+                                    onchange={handleCheckboxChange}
+                                    variant="label-hidden"
+                                    label="Select product">
+                                </lightning-input>
+                            </td>
+                            <td data-label="Product Name">
+                                <div class="slds-truncate" title={product.name}>{product.name}</div>
+                            </td>
+                            <td data-label="Category">
+                                <div class="slds-truncate" title={product.category}>{product.category}</div>
+                            </td>
+                            <td data-label="Discount %">
+                                <lightning-input
+                                    type="number"
+                                    data-id={product.id}
+                                    value={product.discountPercent}
+                                    min="0"
+                                    max="100"
+                                    step="1"
+                                    onchange={handleDiscountChange}
+                                    variant="label-hidden"
+                                    label="Discount percentage"
+                                    disabled={product.isDisabled}
+                                    placeholder="0">
+                                </lightning-input>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-m-top_medium slds-p-around_small slds-theme_shade">
+            <div class="slds-col">
+                <span class="slds-text-body_small">{pageInfo}</span>
+            </div>
+            <div class="slds-col slds-grid slds-grid_align-end">
+                <lightning-button-group>
+                    <lightning-button-icon
+                        icon-name="utility:jump_to_left"
+                        alternative-text="First Page"
+                        title="First Page"
+                        onclick={handleFirstPage}
+                        disabled={noPreviousPage}>
+                    </lightning-button-icon>
+                    <lightning-button-icon
+                        icon-name="utility:chevronleft"
+                        alternative-text="Previous Page"
+                        title="Previous Page"
+                        onclick={handlePreviousPage}
+                        disabled={noPreviousPage}>
+                    </lightning-button-icon>
+                    <lightning-button-icon
+                        icon-name="utility:chevronright"
+                        alternative-text="Next Page"
+                        title="Next Page"
+                        onclick={handleNextPage}
+                        disabled={noNextPage}>
+                    </lightning-button-icon>
+                    <lightning-button-icon
+                        icon-name="utility:jump_to_right"
+                        alternative-text="Last Page"
+                        title="Last Page"
+                        onclick={handleLastPage}
+                        disabled={noNextPage}>
+                    </lightning-button-icon>
+                </lightning-button-group>
+            </div>
+        </div>
+    </template>
+
+    <!-- No Products Message -->
+    <template lwc:if={noProducts}>
+        <template lwc:if={notLoading}>
+            <div class="slds-illustration slds-illustration_small slds-p-around_large slds-align_absolute-center">
+                <div class="slds-text-longform">
+                    <h3 class="slds-text-heading_medium">No Products Found</h3>
+                    <p class="slds-text-body_regular">There are no products available for this promotion.</p>
+                </div>
+            </div>
+        </template>
+    </template>
+
+    <!-- Selected Products Summary -->
+    <template lwc:if={hasSelectedProducts}>
+        <div class="slds-m-top_large">
+            <h3 class="slds-text-heading_small slds-m-bottom_small">Selected Products Summary</h3>
+            <ul class="slds-has-dividers_bottom-space">
+                <template for:each={selectedProductsList} for:item="selectedProduct">
+                    <li key={selectedProduct.productId} class="slds-item">
+                        <div class="slds-grid slds-grid_align-spread">
+                            <span class="slds-text-body_regular">{selectedProduct.productName}</span>
+                            <span class="slds-badge slds-badge_inverse">{selectedProduct.discountPercent}% off</span>
+                        </div>
+                    </li>
+                </template>
+            </ul>
+        </div>
+    </template>
+</template>
+
+JS File:
+--------
+
+import { LightningElement, api, track } from 'lwc';
+
+/** TODO FOR THE CHALLENGE: import the state manager, and the context modules */
+import promotionStateManager from 'c/promotionStateManager';
+import { fromContext } from '@lwc/state';
+
+import getProducts from '@salesforce/apex/PromotionCreatorCtrl.getProducts';
+
+export default class PromotionWizardStep2 extends LightningElement {
+
+    /** TODO FOR THE CHALLENGE: initialize/inherit the state from the parent */
+    promotionState = fromContext(promotionStateManager);
+
+    @track products = [];
+    @track selectedProductsMap = new Map();
+    
+    pageNumber = 1;
+    pageSize = 5;
+    totalItemCount = 0;
+    locator = null;
+    isLoading = true;
+    error = null;
+
+    connectedCallback() {
+        // Restore previously selected products from state
+        this.restoreSelectionsFromState();
+        this.loadProducts();
+    }
+
+    restoreSelectionsFromState() {
+        const stateProducts = this.promotionState?.value?.chosenProducts || [];
+        stateProducts.forEach(product => {
+            this.selectedProductsMap.set(product.productId, {
+                productId: product.productId,
+                productName: product.productName,
+                category: product.category,
+                discountPercent: product.discountPercent || 0
+            });
+        });
+    }
+
+    async loadProducts() {
+        this.isLoading = true;
+        this.error = null;
+        
+        try {
+            const result = await getProducts({
+                type: null,
+                pageNumber: this.pageNumber,
+                locatorParam: this.locator
+            });
+
+            this.pageSize = result.pageSize;
+            this.totalItemCount = result.totalItemCount;
+            this.locator = result.locator;
+
+            // Map products with selection status and discount from our map
+            this.products = result.records.map(record => {
+                const savedProduct = this.selectedProductsMap.get(record.Id);
+                const isSelected = this.selectedProductsMap.has(record.Id);
+                return {
+                    id: record.Id,
+                    name: record.Name,
+                    category: record.cgcloud__Category__c || 'N/A',
+                    isSelected: isSelected,
+                    isDisabled: !isSelected, // For disabled attribute in template
+                    discountPercent: savedProduct ? savedProduct.discountPercent : 0
+                };
+            });
+        } catch (err) {
+            this.error = err.body?.message || 'Failed to load products';
+            console.error('Error loading products:', err);
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    handleCheckboxChange(event) {
+        const productId = event.target.dataset.id;
+        const isChecked = event.target.checked;
+        const product = this.products.find(p => p.id === productId);
+
+        if (isChecked) {
+            // Add to selection map
+            this.selectedProductsMap.set(productId, {
+                productId: productId,
+                productName: product.name,
+                category: product.category,
+                discountPercent: product.discountPercent || 0
+            });
+        } else {
+            // Remove from selection map
+            this.selectedProductsMap.delete(productId);
+        }
+
+        // Update the products array to reflect selection change
+        this.products = this.products.map(p => {
+            if (p.id === productId) {
+                return { ...p, isSelected: isChecked, isDisabled: !isChecked };
+            }
+            return p;
+        });
+    }
+
+    handleDiscountChange(event) {
+        const productId = event.target.dataset.id;
+        let discountValue = parseFloat(event.target.value) || 0;
+        
+        // Clamp between 0 and 100
+        discountValue = Math.max(0, Math.min(100, discountValue));
+
+        // Update in products array
+        this.products = this.products.map(p => {
+            if (p.id === productId) {
+                return { ...p, discountPercent: discountValue };
+            }
+            return p;
+        });
+
+        // Update in selection map if selected
+        if (this.selectedProductsMap.has(productId)) {
+            const existing = this.selectedProductsMap.get(productId);
+            this.selectedProductsMap.set(productId, {
+                ...existing,
+                discountPercent: discountValue
+            });
+        }
+    }
+
+    handlePreviousPage() {
+        if (this.pageNumber > 1) {
+            this.pageNumber--;
+            this.loadProducts();
+        }
+    }
+
+    handleNextPage() {
+        if (this.pageNumber < this.totalPages) {
+            this.pageNumber++;
+            this.loadProducts();
+        }
+    }
+
+    handleFirstPage() {
+        if (this.pageNumber !== 1) {
+            this.pageNumber = 1;
+            this.locator = null; // Reset locator for first page
+            this.loadProducts();
+        }
+    }
+
+    handleLastPage() {
+        if (this.pageNumber !== this.totalPages) {
+            this.pageNumber = this.totalPages;
+            this.loadProducts();
+        }
+    }
+
+    get totalPages() {
+        return Math.ceil(this.totalItemCount / this.pageSize);
+    }
+
+    get hasPreviousPage() {
+        return this.pageNumber > 1;
+    }
+
+    get hasNextPage() {
+        return this.pageNumber < this.totalPages;
+    }
+
+    get pageInfo() {
+        const startItem = (this.pageNumber - 1) * this.pageSize + 1;
+        const endItem = Math.min(this.pageNumber * this.pageSize, this.totalItemCount);
+        return `${startItem}-${endItem} of ${this.totalItemCount}`;
+    }
+
+    get hasProducts() {
+        return this.products && this.products.length > 0;
+    }
+
+    get noProducts() {
+        return !this.hasProducts;
+    }
+
+    get notLoading() {
+        return !this.isLoading;
+    }
+
+    get noPreviousPage() {
+        return !this.hasPreviousPage;
+    }
+
+    get noNextPage() {
+        return !this.hasNextPage;
+    }
+
+    get selectedCount() {
+        return this.selectedProductsMap.size;
+    }
+
+    get hasSelectedProducts() {
+        return this.selectedCount > 0;
+    }
+
+    get selectedProductsList() {
+        return Array.from(this.selectedProductsMap.values());
+    }
+
+    @api
+    allValid() {
+        // Check if at least one product is selected
+        if (this.selectedProductsMap.size === 0) {
+            this.error = 'Please select at least one product.';
+            return false;
+        }
+
+        // Check if all selected products have a discount value
+        let allHaveDiscount = true;
+        this.selectedProductsMap.forEach((product) => {
+            if (!product.discountPercent || product.discountPercent <= 0) {
+                allHaveDiscount = false;
+            }
+        });
+
+        if (!allHaveDiscount) {
+            this.error = 'Please enter a discount percentage (greater than 0) for all selected products.';
+            return false;
+        }
+
+        // Save selections to state
+        const productsArray = Array.from(this.selectedProductsMap.values());
+        this.promotionState.value.updateProducts(productsArray);
+        
+        this.error = null;
+        return true;
+    }
+}
+
+Meta.xml -> false
+
+Promotion Wizard Step 3:
+------------------------
+
+HTML File:
+----------
+
+<template>
+    <div class="slds-m-bottom_medium">
+        <h2 class="slds-text-heading_medium slds-m-bottom_small">Select Applicable Stores</h2>
+        <p class="slds-text-body_regular slds-text-color_weak">
+            Choose the retail stores where this promotion will be applicable.
+        </p>
+    </div>
+
+    <!-- Promotion Summary Card -->
+    <div class="slds-box slds-box_x-small slds-theme_default slds-m-bottom_medium">
+        <div class="slds-grid slds-wrap slds-gutters_small">
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                <p class="slds-text-title_caps slds-m-bottom_xx-small">Promotion Name</p>
+                <p class="slds-text-body_regular slds-text-title">{promotionName}</p>
+            </div>
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                <p class="slds-text-title_caps slds-m-bottom_xx-small">Products Selected</p>
+                <p class="slds-text-body_regular">
+                    <template lwc:if={hasSelectedProducts}>
+                        <template for:each={selectedProducts} for:item="product">
+                            <span key={product.productId} class="slds-badge slds-badge_lightest slds-m-right_xx-small slds-m-bottom_xx-small">
+                                {product.productName} ({product.discountPercent}% off)
+                            </span>
+                        </template>
+                    </template>
+                    <template lwc:else>
+                        <span class="slds-text-color_weak">No products selected</span>
+                    </template>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    <template lwc:if={error}>
+        <div class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_medium" role="alert">
+            <span class="slds-assistive-text">error</span>
+            <span class="slds-icon_container slds-icon-utility-error slds-m-right_x-small">
+                <lightning-icon icon-name="utility:error" alternative-text="Error" size="x-small" variant="inverse"></lightning-icon>
+            </span>
+            <h2>{error}</h2>
+        </div>
+    </template>
+
+    <!-- Loading Spinner -->
+    <template lwc:if={isLoading}>
+        <div class="slds-align_absolute-center slds-p-around_large">
+            <lightning-spinner alternative-text="Loading stores..." size="medium"></lightning-spinner>
+        </div>
+    </template>
+
+    <template lwc:if={hasStores}>
+        <!-- Selection Summary -->
+        <div class="slds-box slds-box_x-small slds-theme_shade slds-m-bottom_medium">
+            <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                <p class="slds-text-body_regular">
+                    <lightning-icon icon-name="utility:store" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                    <strong>{selectedCount}</strong> of <strong>{totalCount}</strong> store(s) selected
+                </p>
+            </div>
+        </div>
+
+        <!-- Stores Table -->
+        <div class="slds-scrollable_x">
+            <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                <thead>
+                    <tr class="slds-line-height_reset">
+                        <th class="" scope="col" style="width: 50px;">
+                            <div class="slds-truncate" title="Select All">
+                                <lightning-input
+                                    type="checkbox"
+                                    checked={allSelected}
+                                    indeterminate={someSelected}
+                                    onchange={handleSelectAll}
+                                    variant="label-hidden"
+                                    label="Select all stores">
+                                </lightning-input>
+                            </div>
+                        </th>
+                        <th class="" scope="col">
+                            <div class="slds-truncate" title="Store Name">Store Name</div>
+                        </th>
+                        <th class="" scope="col">
+                            <div class="slds-truncate" title="Location Group">Location Group</div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template for:each={stores} for:item="store">
+                        <tr key={store.id}>
+                            <td data-label="Select">
+                                <lightning-input
+                                    type="checkbox"
+                                    data-id={store.id}
+                                    checked={store.isSelected}
+                                    onchange={handleCheckboxChange}
+                                    variant="label-hidden"
+                                    label="Select store">
+                                </lightning-input>
+                            </td>
+                            <td data-label="Store Name">
+                                <div class="slds-truncate" title={store.name}>{store.name}</div>
+                            </td>
+                            <td data-label="Location Group">
+                                <div class="slds-truncate" title={store.locationGroup}>{store.locationGroup}</div>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </template>
+
+    <!-- No Stores Message -->
+    <template lwc:if={noStores}>
+        <template lwc:if={notLoading}>
+            <div class="slds-illustration slds-illustration_small slds-p-around_large slds-align_absolute-center">
+                <div class="slds-text-longform">
+                    <h3 class="slds-text-heading_medium">No Stores Found</h3>
+                    <p class="slds-text-body_regular">
+                        There are no retail stores associated with this account.
+                    </p>
+                </div>
+            </div>
+        </template>
+    </template>
+
+    <!-- Selected Stores Summary -->
+    <template lwc:if={hasSelectedStores}>
+        <div class="slds-m-top_large">
+            <h3 class="slds-text-heading_small slds-m-bottom_small">Selected Stores</h3>
+            <div class="slds-grid slds-wrap slds-gutters_x-small">
+                <template for:each={selectedStoresList} for:item="store">
+                    <div key={store.id} class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-3 slds-m-bottom_x-small">
+                        <div class="slds-box slds-box_x-small slds-theme_shade">
+                            <p class="slds-text-body_regular slds-truncate" title={store.name}>
+                                <lightning-icon icon-name="utility:store" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                {store.name}
+                            </p>
+                            <p class="slds-text-body_small slds-text-color_weak">{store.locationGroup}</p>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </template>
+</template>
+
+JS File:
+--------
+
+import { LightningElement, api, track } from 'lwc';
+import { fromContext } from '@lwc/state';
+import promotionStateManager from 'c/promotionStateManager';
+import getRetailStores from '@salesforce/apex/PromotionCreatorCtrl.getRetailStores';
+
+export default class PromotionWizardStep3 extends LightningElement {
+    promotionState = fromContext(promotionStateManager);
+
+    @api recordId; // Account Id passed from parent wizard
+
+    @track stores = [];
+    @track selectedStoreIds = new Set();
+    
+    isLoading = true;
+    error = null;
+
+    connectedCallback() {
+        this.restoreSelectionsFromState();
+        this.loadStores();
+    }
+
+    restoreSelectionsFromState() {
+        const stateStores = this.promotionState?.value?.chosenStores || [];
+        stateStores.forEach(store => {
+            this.selectedStoreIds.add(store.storeId);
+        });
+    }
+
+    async loadStores() {
+        this.isLoading = true;
+        this.error = null;
+
+        try {
+            const result = await getRetailStores({
+                accountId: this.recordId
+            });
+
+            this.stores = result.map(store => ({
+                id: store.Id,
+                name: store.Name,
+                locationGroup: store.RetailLocationGroup?.Name || 'N/A',
+                isSelected: this.selectedStoreIds.has(store.Id)
+            }));
+        } catch (err) {
+            this.error = err.body?.message || 'Failed to load stores';
+            console.error('Error loading stores:', err);
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    handleCheckboxChange(event) {
+        const storeId = event.target.dataset.id;
+        const isChecked = event.target.checked;
+        const store = this.stores.find(s => s.id === storeId);
+
+        if (isChecked) {
+            this.selectedStoreIds.add(storeId);
+        } else {
+            this.selectedStoreIds.delete(storeId);
+        }
+
+        // Update the stores array to reflect selection change
+        this.stores = this.stores.map(s => {
+            if (s.id === storeId) {
+                return { ...s, isSelected: isChecked };
+            }
+            return s;
+        });
+
+        // Keep shared state in sync so parent can validate without querying the child
+        const storesArray = this.stores
+            .filter(s => this.selectedStoreIds.has(s.id))
+            .map(s => ({ storeId: s.id, storeName: s.name, locationGroup: s.locationGroup }));
+        this.promotionState.value.updateStores(storesArray);
+    }
+
+    handleSelectAll(event) {
+        const isChecked = event.target.checked;
+        
+        if (isChecked) {
+            this.stores.forEach(store => {
+                this.selectedStoreIds.add(store.id);
+            });
+        } else {
+            this.selectedStoreIds.clear();
+        }
+
+        this.stores = this.stores.map(s => ({
+            ...s,
+            isSelected: isChecked
+        }));
+
+        // Keep shared state in sync so parent can validate without querying the child
+        const storesArray = this.stores
+            .filter(s => this.selectedStoreIds.has(s.id))
+            .map(s => ({ storeId: s.id, storeName: s.name, locationGroup: s.locationGroup }));
+        this.promotionState.value.updateStores(storesArray);
+    }
+
+    get hasStores() {
+        return this.stores && this.stores.length > 0;
+    }
+
+    get noStores() {
+        return !this.hasStores;
+    }
+
+    get notLoading() {
+        return !this.isLoading;
+    }
+
+    get selectedCount() {
+        return this.selectedStoreIds.size;
+    }
+
+    get totalCount() {
+        return this.stores.length;
+    }
+
+    get hasSelectedStores() {
+        return this.selectedCount > 0;
+    }
+
+    get allSelected() {
+        return this.stores.length > 0 && this.selectedStoreIds.size === this.stores.length;
+    }
+
+    get someSelected() {
+        return this.selectedStoreIds.size > 0 && this.selectedStoreIds.size < this.stores.length;
+    }
+
+    get selectedStoresList() {
+        return this.stores.filter(s => this.selectedStoreIds.has(s.id));
+    }
+
+    // Get summary data from state for display
+    get promotionName() {
+        return this.promotionState?.value?.promotionName || 'Untitled Promotion';
+    }
+
+    get selectedProducts() {
+        return this.promotionState?.value?.chosenProducts || [];
+    }
+
+    get hasSelectedProducts() {
+        return this.selectedProducts.length > 0;
+    }
+
+    @api
+    allValid() {
+        // Check if at least one store is selected
+        if (this.selectedStoreIds.size === 0) {
+            this.error = 'Please select at least one store.';
+            return false;
+        }
+
+        // Save selections to state
+        const storesArray = this.stores
+            .filter(s => this.selectedStoreIds.has(s.id))
+            .map(s => ({
+                storeId: s.id,
+                storeName: s.name,
+                locationGroup: s.locationGroup
+            }));
+        
+        this.promotionState.value.updateStores(storesArray);
+        
+        this.error = null;
+        return true;
+    }
+
+    @api
+    getPromotionData() {
+        return {
+            promotionName: this.promotionName,
+            products: this.selectedProducts,
+            stores: this.selectedStoresList.map(s => ({
+                storeId: s.id,
+                storeName: s.name,
+                locationGroup: s.locationGroup
+            }))
+        };
+    }
+}
+
+Meta.xml -> false
+
+Promotion Creation Wizard Parent:
+---------------------------------
+
+HTML:
+-----
+
+<template>
+    <lightning-card title={stepTitle}>
+        <!-- Progress Indicator -->
+        <div class="slds-p-horizontal_medium slds-p-top_small">
+            <lightning-progress-indicator current-step={currentStepForProgress} type="path" variant="base">
+                <lightning-progress-step label="Details" value="1"></lightning-progress-step>
+                <lightning-progress-step label="Products" value="2"></lightning-progress-step>
+                <lightning-progress-step label="Stores" value="3"></lightning-progress-step>
+            </lightning-progress-indicator>
+        </div>
+
+        <div class="slds-p-around_medium">
+            <template lwc:if={isStep1}>
+                <c-promotion-wizard-step1></c-promotion-wizard-step1>
+            </template>
+            <template lwc:elseif={isStep2}>
+                <c-promotion-wizard-step2></c-promotion-wizard-step2>
+            </template>
+            <template lwc:elseif={isStep3}>
+                <c-promotion-wizard-step3 record-id={recordId}></c-promotion-wizard-step3>
+            </template>
+        </div>
+
+        <div slot="footer" class="slds-grid slds-grid_align-spread">
+            <div>
+                <template lwc:if={showPrevious}>
+                    <lightning-button 
+                        label="Previous" 
+                        onclick={handlePrevious}
+                        icon-name="utility:chevronleft">
+                    </lightning-button>
+                </template>
+            </div>
+            <div>
+                <template lwc:if={showNext}>
+                    <lightning-button 
+                        label="Next" 
+                        variant="brand"
+                        onclick={handleNext}
+                        icon-name="utility:chevronright"
+                        icon-position="right">
+                    </lightning-button>
+                </template>
+                <template lwc:if={showFinish}>
+                    <lightning-button 
+                        label={saveButtonLabel}
+                        variant="brand"
+                        onclick={handleSave}
+                        icon-name="utility:check"
+                        disabled={isSaveDisabled}>
+                    </lightning-button>
+                </template>
+            </div>
+        </div>
+    </lightning-card>
+</template>
+
+JS File:
+--------
+
+import { LightningElement, api, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+
+/** TODO FOR THE CHALLENGE: import the state manager */
+import promotionStateManager from 'c/promotionStateManager';
+
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { CloseActionScreenEvent } from 'lightning/actions';
+import savePromotion from '@salesforce/apex/PromotionCreatorCtrl.savePromotion';
+
+export default class PromotionCreationWizard extends NavigationMixin(LightningElement) {
+    @api recordId; // Account Id from record page context
+
+    currentStep = 1;
+
+    /** TODO FOR THE CHALLENGE: initialize the state manager */
+    promotionState = promotionStateManager();
+
+    @track isSaving = false;
+
+    handleNext() {
+        if (this.currentStep === 1) {
+            const element = this.template.querySelector('c-promotion-wizard-step1');
+            console.log('Step1 element:', element);
+
+            const isValid = element.allValid();
+            console.log('Step 1 valid:', isValid);
+
+            if (isValid) {
+                this.currentStep++;
+                console.log('Moved to step:', this.currentStep);
+            } else {
+                this.showToast('Validation Error', 'Please enter a promotion name.', 'error');
+            }
+        } else if (this.currentStep === 2) {
+            const element = this.template.querySelector('c-promotion-wizard-step2');
+            if (element.allValid()) {
+                this.currentStep++;
+            } else {
+                this.showToast('Validation Error', 'Please select at least one product with a valid discount.', 'error');
+            }
+        }
+    }
+
+    handlePrevious() {
+        this.currentStep--;
+    }
+
+    async handleSave() {
+        const step3Element = this.template.querySelector('c-promotion-wizard-step3');
+        
+        if (!step3Element || !step3Element.allValid()) {
+            this.showToast('Validation Error', 'Please select at least one store.', 'error');
+            return;
+        }
+
+        // Get final promotion data from step 3
+        const promotionData = step3Element.getPromotionData();
+        
+        // Build the payload for Apex
+        const payload = {
+            promotionName: promotionData.promotionName,
+            accountId: this.recordId,
+            templateId: null, // Can be extended to include template from Step 1
+            startDate: null,  // Can be extended to include dates from Step 1
+            endDate: null,
+            products: promotionData.products.map(p => ({
+                productId: p.productId,
+                productName: p.productName,
+                category: p.category || null,
+                discountPercent: p.discountPercent
+            })),
+            stores: promotionData.stores.map(s => ({
+                storeId: s.storeId,
+                storeName: s.storeName,
+                locationGroup: s.locationGroup || null
+            }))
+        };
+
+        this.isSaving = true;
+
+        try {
+            const result = await savePromotion({ 
+                promotionDataJson: JSON.stringify(payload) 
+            });
+            
+            console.log('Save result:', result);
+            
+            this.showToast(
+                'Success', 
+                result.message || 'Promotion created successfully!', 
+                'success'
+            );
+            
+            // Close the modal/action
+            this.closeAction();
+            
+            // Navigate to the new promotion record
+            if (result.promotionId) {
+                this.navigateToRecord(result.promotionId);
+            }
+            
+        } catch (error) {
+            const errorMessage = error.body?.message || error.message || 'An unexpected error occurred.';
+            this.showToast('Error', errorMessage, 'error');
+        } finally {
+            this.isSaving = false;
+        }
+    }
+
+    closeAction() {
+        this.dispatchEvent(new CloseActionScreenEvent());
+        // Also dispatch custom close event for other contexts
+        this.dispatchEvent(new CustomEvent('close'));
+    }
+
+    navigateToRecord(recordId) {
+        this[NavigationMixin.Navigate]({
+            type: 'standard__recordPage',
+            attributes: {
+                recordId: recordId,
+                objectApiName: 'Promotion',
+                actionName: 'view'
+            }
+        });
+    }
+
+    showToast(title, message, variant) {
+        this.dispatchEvent(
+            new ShowToastEvent({
+                title: title,
+                message: message,
+                variant: variant
+            })
+        );
+    }
+
+    get isStep1() {
+        return this.currentStep === 1;
+    }
+
+    get isStep2() {
+        return this.currentStep === 2;
+    }
+
+    get isStep3() {
+        return this.currentStep === 3;
+    }
+
+    get stepTitle() {
+        switch(this.currentStep) {
+            case 1: return 'Step 1: Promotion Details';
+            case 2: return 'Step 2: Select Products';
+            case 3: return 'Step 3: Select Stores';
+            default: return 'Create Promotion';
+        }
+    }
+
+    get saveButtonLabel() {
+        return this.isSaving ? 'Creating...' : 'Create Promotion';
+    }
+
+    get isSaveDisabled() {
+        return this.isSaving;
+    }
+
+    get showPrevious() {
+        return this.currentStep !== 1;
+    }
+
+    get showNext() {
+        return this.currentStep !== 3;
+    }
+
+    get showFinish() {
+        return this.currentStep === 3;
+    }
+
+    get currentStepForProgress() {
+        return `${this.currentStep}`;
+    }
+}
+
+Meta.xml File:
+--------------
+
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>65.0</apiVersion>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>lightning__AppPage</target>
+        <target>lightning__HomePage</target>
+        <target>lightning__RecordPage</target>
+        <target>lightning__RecordAction</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__RecordAction">
+            <actionType>ScreenAction</actionType>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>
+
+
+

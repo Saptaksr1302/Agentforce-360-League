@@ -1,0 +1,46 @@
+{
+  "records": [
+    {
+      "attributes": {
+        "type": "CareObservation",
+        "referenceId": "CareObservationRef1"
+      },
+      "Name": "Blood Glucose",
+      "ObservedValueNumerator": 6.8,
+      "ObservedValueType": "Quantity",
+      "ObservedValueUnitId": "@ObservedValueUnitRef1",
+      "CodeId": "@CodeSet_BloodGlucose",
+      "EffectiveDateTime": "2025-12-14T19:45:00.000+0000",
+      "ObservationStatus": "Final",
+      "ObservedSubjectId": "@AccountRef1"
+    },
+    {
+      "attributes": {
+        "type": "CareObservation",
+        "referenceId": "CareObservationRef2"
+      },
+      "Name": "Blood Glucose",
+      "ObservedValueNumerator": 7.2,
+      "ObservedValueType": "Quantity",
+      "ObservedValueUnitId": "@ObservedValueUnitRef1",
+      "CodeId": "@CodeSet_BloodGlucose",
+      "EffectiveDateTime": "2025-12-14T19:45:00.000+0000",
+      "ObservationStatus": "Final",
+      "ObservedSubjectId": "@AccountRef2"
+    },
+    {
+      "attributes": {
+        "type": "CareObservation",
+        "referenceId": "CareObservationRef3"
+      },
+      "Name": "Blood Glucose",
+      "ObservedValueNumerator": 5.5,
+      "ObservedValueType": "Quantity",
+      "ObservedValueUnitId": "@ObservedValueUnitRef1",
+      "CodeId": "@CodeSet_BloodGlucose",
+      "EffectiveDateTime": "2025-12-14T18:32:00.000+0000",
+      "ObservationStatus": "Final",
+      "ObservedSubjectId": "@AccountRef3"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "records": [
+    {
+      "attributes": {
+        "type": "CodeSet",
+        "referenceId": "CodeSet_BloodGlucose"
+      },
+      "Name": "HbA1c",
+      "Code": "HbA1c"
+    }
+  ]
+}

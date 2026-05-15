@@ -1,0 +1,36 @@
+Folder & File Structure:
+-------------------------
+
+lightningTypes 
+
+      |
+
+complianceResult -> schema.json
+
+      |
+
+lightningDesktopGenAi -> renderer.json
+
+
+Schema File:
+------------
+
+{
+  "title": "Compliance Result",
+  "description": "Price compliance check result with target price, gap and status",
+  "lightning:type": "@apexClassType/c__ComplianceMetrics"
+}
+
+Renderer File:
+--------------
+
+{
+  "renderer": {
+    "componentOverrides": {
+        "$": {
+            "definition": "c/complianceCheckerCard"
+        }
+    }
+  }
+}
+

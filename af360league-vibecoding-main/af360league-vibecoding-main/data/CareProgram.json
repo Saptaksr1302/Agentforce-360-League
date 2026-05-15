@@ -1,0 +1,13 @@
+{
+  "records": [
+    {
+      "attributes": {
+        "type": "CareProgram",
+        "referenceId": "CareProgramRef1"
+      },
+      "Name": "Diabetes Management Program",
+      "Status": "Active",
+      "Description": "Comprehensive diabetes care coordination program"
+    }
+  ]
+}

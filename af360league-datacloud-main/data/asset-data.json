@@ -1,0 +1,53 @@
+{
+  "records": [
+    {
+      "attributes": {
+        "type": "Asset",
+        "referenceId": "AssetRef1"
+      },
+      "Name": "Excavator EX-001",
+      "SerialNumber": "EX-2024-001",
+      "InstallDate": "2024-01-15",
+      "Status": "Installed",
+      "AccountId": "@AccountRef1",
+      "ContactId": "@ContactRef1"
+    },
+    {
+      "attributes": {
+        "type": "Asset",
+        "referenceId": "AssetRef2"
+      },
+      "Name": "Hydraulic Pump HP-002",
+      "SerialNumber": "HP-2024-002",
+      "InstallDate": "2024-06-01",
+      "Status": "Installed",
+      "AccountId": "@AccountRef2",
+      "ContactId": "@ContactRef2"
+    },
+    {
+      "attributes": {
+        "type": "Asset",
+        "referenceId": "AssetRef3"
+      },
+      "Name": "Compressor COMP-001",
+      "SerialNumber": "COMP-2024-001",
+      "InstallDate": "2023-11-10",
+      "Status": "Installed",
+      "AccountId": "@AccountRef1",
+      "ContactId": "@ContactRef1"
+    },
+    {
+      "attributes": {
+        "type": "Asset",
+        "referenceId": "AssetRef4"
+      },
+      "Name": "Industrial Motor MOT-001",
+      "SerialNumber": "MOT-2024-001",
+      "InstallDate": "2024-03-20",
+      "Status": "Installed",
+      "AccountId": "@AccountRef3",
+      "ContactId": "@ContactRef3"
+    }
+  ]
+}
+

@@ -1,0 +1,42 @@
+[
+    {
+        "sobject": "Account",
+        "saveRefs": true,
+        "resolveRefs": false,
+        "files": [
+            "Account.json"
+        ]
+    },
+    {
+        "sobject": "CodeSet",
+        "saveRefs": true,
+        "resolveRefs": false,
+        "files": [
+            "CodeSet.json"
+        ]
+    },
+    {
+        "sobject": "UnitOfMeasure",
+        "saveRefs": true,
+        "resolveRefs": true,
+        "files": [
+            "ObservedValueUnit.json"
+        ]
+    },
+    {
+        "sobject": "CareObservation",
+        "saveRefs": true,
+        "resolveRefs": true,
+        "files": [
+            "CareObservation.json"
+        ]
+    },
+    {
+        "sobject": "CareProgram",
+        "saveRefs": true,
+        "resolveRefs": false,
+        "files": [
+            "CareProgram.json"
+        ]
+    }
+]
