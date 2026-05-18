@@ -131,5 +131,3 @@ Key concepts covered:
 - Building an agent for a manufacturing business
 
 The implementation demonstrates how processed enterprise data can be used across Salesforce automation, Apex logic, and Agentforce-powered experiences.
-
----
